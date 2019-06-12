@@ -29,3 +29,7 @@ table td:last-child {
 table tbody tr:nth-child(2n) td {
   background: #D4D8F9;
 }
+
+tr.active td {
+   background-color: #8fc3f7;
+}

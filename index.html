@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Page Title</title>
+<link rel="stylesheet" type="text/css" href="assets/css/main.css">
+<!-- development version, includes helpful console warnings -->
+<script type="text/javascript" src = "assets/js/vue.js" ></script>
+  <!-- Bootstrap CSS -->
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+</head>
+<body>
+
+  <div class="container">
+    <div id="app">
+      <table>
+    <thead>
+      <tr>
+        <th @click="sort('name')">Name</th>
+        <th @click="sort('id')">ID</th>
+        <th @click="sort('createdat')">Created at</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr style = "cursor:pointer" v-for="x in sortedCats">
+        <td>{{x.name}}</td>
+        <td>{{x.id}}</td>
+        <td>{{x.createdAt}}</td>
+      </tr>
+    </tbody>
+  </table>
+  <br>
+  <p style = "margin-left:10px;">
+  <button @click="prevPage">Previous</button> 
+  <button @click="nextPage">Next</button>
+  </p>
+      <!-- <li v-for="x in info">{{ x.name }} </li> -->
+    sort by:{{currentSort}}, direction:{{currentSortDir}}, page:{{currentPage}}
+    </div>
+
+    <div id = "showdetails" style="display: none;">
+      <li id = "showname" style="list-style: none;"></li>
+      <li id = "showid" style="list-style: none;"></li>
+      <li id = "showcreate" style="list-style: none;"></li>
+    </div>
+
+  </div>
+
+  <script
+  src="https://code.jquery.com/jquery-3.4.1.min.js"
+  integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+  crossorigin="anonymous"></script>
+
+  <script
+  src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
+  integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU="
+  crossorigin="anonymous"></script>
+
+  <script>
+
+  const app = new Vue({
+  el:'#app',
+  data:{
+    cats:[],
+    currentSort:'name',
+    currentSortDir:'asc',
+    pageSize:3,
+    currentPage:1
+  },
+  created:function() {
+    fetch('http://data.consumerfinance.gov/api/views.json')
+    .then(res => res.json())
+    .then(res => {
+      this.cats = res;
+    })
+  },
+  methods:{
+    sort:function(s) {
+      //if s == current sort, reverse
+      if(s === this.currentSort) {
+        this.currentSortDir = this.currentSortDir==='asc'?'desc':'asc';
+      }
+      this.currentSort = s;
+    },
+    nextPage:function() {
+      if((this.currentPage*this.pageSize) < this.cats.length) this.currentPage++;
+    },
+    prevPage:function() {
+      if(this.currentPage > 1) this.currentPage--;
+    }
+
+  },
+  computed:{
+    sortedCats:function() {
+      return this.cats.sort((a,b) => {
+        let modifier = 1;
+        if(this.currentSortDir === 'desc') modifier = -1;
+        if(a[this.currentSort] < b[this.currentSort]) return -1 * modifier;
+        if(a[this.currentSort] > b[this.currentSort]) return 1 * modifier;
+        return 0;
+      }).filter((row, index) => {
+        let start = (this.currentPage-1)*this.pageSize;
+        let end = this.currentPage*this.pageSize;
+        if(index >= start && index < end) return true;
+      });
+    }
+  }
+})
+  </script>
+
+  <script>
+    var table = document.getElementsByTagName("table")[0];
+    var tbody = table.getElementsByTagName("tbody")[0];
+    tbody.onclick = function (e) {
+        e = e || window.event;
+        var data = [];
+        var target = e.srcElement || e.target;
+        while (target && target.nodeName !== "TR") {
+            target = target.parentNode;
+        }
+        if (target) {
+            var cells = target.getElementsByTagName("td");
+            for (var i = 0; i < cells.length; i++) {
+                data.push(cells[i].innerHTML);
+            }
+        }
+        $("#showdetails").css('display','block');
+        document.getElementById("showname").innerHTML = 'Name:' + data[0];
+        document.getElementById("showid").innerHTML = 'ID:' + data[1];
+        document.getElementById("showcreate").innerHTML = 'Created at:' + data[2];
+
+    };
+  </script>
+
+</body>
+</html>

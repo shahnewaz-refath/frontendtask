@@ -1,0 +1,5 @@
+1. First import salesapi database.
+2.jsonapi.php which retrieving database information is as json data.
+3.then run api.php which shows 10000 data which comes as json and represnt via vue js.
+4.then run index.html where sort,pagination and row details is implemented.
+thank you
